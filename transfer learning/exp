@@ -1,0 +1,90 @@
+import numpy as np
+import json
+import random
+import random
+import nltk
+import pandas as pd
+import joblib
+import experiment
+from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import LabelEncoder
+import pickle
+import os
+import tensorflow as tf 
+from keras.models import Sequential
+from sklearn.model_selection import train_test_split
+from keras.models import load_model
+from nltk.tokenize import word_tokenize
+from keras.preprocessing.text import Tokenizer
+from keras.utils import pad_sequences
+from nltk.stem import WordNetLemmatizer
+from keras.layers import Dense, Embedding, Flatten,Input,Dropout,LSTM,GRU,GlobalAveragePooling1D, Conv1D, MaxPool1D
+from keras.callbacks import TensorBoard,EarlyStopping
+from keras.preprocessing.text import Tokenizer
+model=load_model('transfer_chatbot.h5')
+# tokenizer=Tokenizer()
+# import random
+# le=LabelEncoder()
+# dataset= json.loads(open('Intent.json').read())
+
+# maxlen= 500
+
+
+# words=[]
+# sequences=[]
+# documents=[]
+# classes=[]
+# ignoreletters=['?','!','.',',','-','_']
+
+# def processing_json_dataset(dataset):
+#   tags = []
+#   inputs = []
+#   responses={}
+#   for intent in dataset['intents']:
+#     responses[intent['intent']]=intent['responses']
+#     for lines in intent['text']:
+#       inputs.append(lines)
+#       tags.append(intent['intent'])
+#   return [tags, inputs, responses]
+
+# [tags, inputs, responses] = processing_json_dataset(dataset)
+# dataset = pd.DataFrame({"inputs":inputs,
+#                      "tags":tags})
+# def generate_answer(query):
+#   texts = []
+#   pred_input = query
+#   pred_input = tokenizer.texts_to_sequences(texts)
+#   pred_input = np.array(pred_input).reshape(-1)
+#   pred_input = pad_sequences([pred_input],9)
+#   output = model.predict(pred_input)
+#   output = output.argmax()
+#   response_tag = le.inverse_transform([output])[0]
+#   return random.choice(responses[response_tag])
+
+# while True:
+#   message = input("")  
+#   res=generate_answer(message)
+#   print(res)
+
+responses= experiment.responses
+le=joblib.load('le.pkl')
+le_cl=joblib.load('labels_dump.pkl')
+def process(msg):
+    tokenizer=Tokenizer()
+    tokenizer.fit_on_texts(msg)
+    sequences=tokenizer.texts_to_sequences(msg)
+    padded_seq=pad_sequences(sequences,9)
+    inp=np.array(padded_seq)
+    output=model.predict(inp)
+    output=output.argmax()
+    if output > 22:
+        print('Dont know what you are saying')
+    else:
+        pred_class= le.inverse_transform([output])[0]
+        ans= random.choice(responses[pred_class])
+        return ans
+print('Bot Activated')
+while True:
+    message=input("")
+    out=process(message)
+    print(out)
